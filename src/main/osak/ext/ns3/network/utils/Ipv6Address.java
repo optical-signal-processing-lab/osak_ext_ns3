@@ -36,10 +36,10 @@ public class Ipv6Address {
     boolean m_initialized; // 
     
     /**
-     * 
+     * Default initialization
      */
     public Ipv6Address() {
-	Arrays.fill(m_address, (byte) 0);// fills 0
+	Arrays.fill(m_address, (byte) 0);
 	m_initialized = false;
     }
     
@@ -48,7 +48,7 @@ public class Ipv6Address {
      * @param addr
      */
     public Ipv6Address(final Ipv6Address addr) {
-	System.arraycopy(addr.m_address, 0, m_address, 0, 16);// m_address->addr.m_addresss
+	System.arraycopy(addr.m_address, 0, m_address, 0, 16);
 	m_initialized = true;
     }
     
@@ -57,13 +57,18 @@ public class Ipv6Address {
      * @param address
      */
     public Ipv6Address(byte[] address) {
-	System.arraycopy(address, 0, m_address, 0, 16);// m_address->addr.m_addresss
+	System.arraycopy(address, 0, m_address, 0, 16);
 	m_initialized = true;
     }
     
     /**
+     * @brief Constructs an Ipv6Address by parsing a the input C-string
      * 
+     * Input address is in format:
+     * \c hhhh:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:llll
+     * where \c h is the high byte and \c l the low byte
      * @param address
+     * 	      C-string containing the address as described above
      */
     public Ipv6Address(String address) {
 	try {
@@ -80,13 +85,18 @@ public class Ipv6Address {
     }
     
     /**
+     * Sets an Ipv6Address by parsing a the input C-string
      * 
+     * Input address is in format:
+     * \c hhhh:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:llll
+     * where \c h is the high byte and \c l the low byte
      * @param address
+     * 	      C-string containing the address as described above
      */
     public void Set(String address) {
 	try {
 	    InetAddress addr = Inet6Address.getByName(address);
-	    m_address = addr.getAddress();//to 二进制
+	    m_address = addr.getAddress();
 	    m_initialized = true;
 	} catch (Exception e) {
 	    MyLog.logOut("Ipv6Address::Ipv6Address",
@@ -97,8 +107,9 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Input address is in host order
      * @param address
+     * 	      The host order 128-bit address
      */
     public void Set(byte[] address) {
 	System.arraycopy(address, 0, m_address, 0, 16);
@@ -106,17 +117,20 @@ public class Ipv6Address {
     }
       
     /**
-     * 
+     * Serialize this address to a 16-byte buffer
      * @param buf
+     * 	      Output buffer to which this address gets overwritten with this Ipv6Address
      */
     public void Serialize(byte[] buf) {
 	System.arraycopy(m_address, 0, buf, 0, 16);
     }
     
     /**
-     * 
+     * The input address is expected to be in network byte order format
      * @param buf
-     * @return
+     * 	      Buffer to read address from
+     * @return ipv6
+     * 	       An Ipv6Address
      */
     public static Ipv6Address Deserialize(byte[] buf) {
 	Ipv6Address ipv6 = new Ipv6Address(buf);
@@ -125,9 +139,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Converts an Ipv6 address an Ipv4-mapped Ipv6 address.
      * @param addr
-     * @return
+     * 	      The Ipv4 address to be mapped.
+     * @return An {@code Ipv6Address} object representing the Ipv4-mapped Ipv6 address.
      */
     public Ipv6Address MakeIpv4MappedAddress(Ipv4Address addr) {
 	byte [] buf = new byte[16];
@@ -148,7 +163,7 @@ public class Ipv6Address {
 	buf[14] = 0x00;
 	buf[15] = 0x00;
 	
-	//将IPv4复制到buf的后四个字节
+	//Copy IPv4 to the last four bytes of buf
 	byte[] temp_buf = new byte[4];
 	addr.Serialize(temp_buf);
 	buf[12] = temp_buf[0];
@@ -160,8 +175,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * Extracts the Ipv4 address from an Ipv4-mapped Ipv6 address.
+     * @return An {@code Ipv4Address} object representing the extracted Ipv4 address.
      */
     public Ipv4Address GetIpv4MappedAddress() {
 	byte[] buf = new byte[16];
@@ -177,10 +192,13 @@ public class Ipv6Address {
     }
     
     /**
+     * Generates an Ipv6 address using the given MAC or other address type and a specified prefix.
      * 
      * @param addr
+     * 	      The address (could be MAC or other types) to use for autoconfiguration.
      * @param prefix
-     * @return
+     * 	      The Ipv6 prefix to combine with the address.
+     * @return The autoconfigured Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredAddress(Address addr, Ipv6Address prefix) {
 	Ipv6Address ipv6Addr = GetAny();
@@ -203,10 +221,12 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates an Ipv6 address using the given address and an Ipv6 prefix.
      * @param addr
+     * 	      The address to use for generating the Ipv6 address.
      * @param prefix
-     * @return
+     * 	      The Ipv6 prefix to combine with the address.
+     * @return The autoconfigured Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredAddress(Address addr, Ipv6Prefix prefix) {
 	Ipv6Address ipv6PrefixAddr = GetOnes().CombinePrefix(prefix);
@@ -214,10 +234,12 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates an Ipv6 address using a MAC16 address and an Ipv6 prefix.
      * @param addr
+     * 	      The MAC16 address to use.
      * @param prefix
-     * @return
+     * 	      The Ipv6 prefix.
+     * @return The generated Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredAddress(Mac16Address addr, Ipv6Address prefix) {
 	Ipv6Address ret = new Ipv6Address();
@@ -236,10 +258,12 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates an Ipv6 address using a MAC48 address and an Ipv6 prefix.
      * @param addr
+     * 	      The MAC48 address to use.
      * @param prefix
-     * @return
+     * 	      The Ipv6 prefix.
+     * @return The generated Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredAddress(Mac48Address addr, Ipv6Address prefix) {
 	Ipv6Address ret = new Ipv6Address();
@@ -259,10 +283,12 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates an Ipv6 address using a MAC64 address and an Ipv6 prefix.
      * @param addr
+     * 	      The MAC64 address to use.
      * @param prefix
-     * @return
+     * 	      The Ipv6 prefix.
+     * @return The generated Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredAddress(Mac64Address addr, Ipv6Address prefix) {
 	Ipv6Address ret = new Ipv6Address();
@@ -278,10 +304,12 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates an Ipv6 address using a MAC8 address and an Ipv6 prefix.
      * @param addr
+     * 	      The MAC8 address to use.
      * @param prefix
-     * @return
+     * 	      The Ipv6 prefix.
+     * @return The generated Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredAddress(Mac8Address addr, Ipv6Address prefix) {
 	Ipv6Address ret = new Ipv6Address();
@@ -301,9 +329,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates a link-local Ipv6 address using a generic address.
      * @param addr
-     * @return
+     * 	      The generic address.
+     * @return The link-local Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredALinkLocalAddress(Address addr) {
    	Ipv6Address ipv6Addr = GetAny();
@@ -326,9 +355,10 @@ public class Ipv6Address {
        }
     
     /**
-     * 
+     * Generates a link-local Ipv6 address using a 16-bit MAC address.
      * @param addr
-     * @return
+     * 	      The 16-bit MAC address.
+     * @return The link-local Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredALinkLocalAddress(Mac16Address addr) {
 	Ipv6Address ret = new Ipv6Address();
@@ -348,9 +378,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates a link-local Ipv6 address using a 48-bit MAC address.
      * @param addr
-     * @return
+     * 	      The 48-bit MAC address.
+     * @return The link-local Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredALinkLocalAddress(Mac48Address addr) {
 	Ipv6Address ret = new Ipv6Address();
@@ -371,9 +402,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates a link-local Ipv6 address using a 64-bit MAC address.
      * @param addr
-     * @return
+     * 	      The 64-bit MAC address.
+     * @return The link-local Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredALinkLocalAddress(Mac64Address addr) {
 	Ipv6Address ret = new Ipv6Address();
@@ -390,9 +422,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Generates a link-local Ipv6 address using a 8-bit MAC address.
      * @param addr
-     * @return
+     * 	      The 8-bit MAC address.
+     * @return The link-local Ipv6 address.
      */
     public Ipv6Address MakeAutoconfiguredALinkLocalAddress(Mac8Address addr) {
 	Ipv6Address ret = new Ipv6Address();
@@ -412,9 +445,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Creates a solocited-node multicast Ipv6 address for the given unicast address.
      * @param addr
-     * @return
+     * 	      The unicast Ipv6 address
+     * @return The solicited-node multicast Ipv6 address.
      */
     public Ipv6Address MakeSolicitedAddress(Ipv6Address addr) {
 	byte[] buf = new byte[16];
@@ -447,8 +481,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * Checks if the Ipv6 address is the localhost address.
+     * @return true if the address is the localhost address, otherwise false.
      */
     private static Ipv6Address localhost = new Ipv6Address("::1");
     public boolean IsLocalhost() {	
@@ -456,8 +490,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * Checks if the Ipv6 address is a multicast address.
+     * @return true if the address is the multicast address, otherwise false.
      */
     public boolean IsMulticast() {
 	if(m_address[0] == 0xff)
@@ -468,8 +502,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * Checks if the Ipv6 address is a link-local multicast address.
+     * @return true if the address is the link-local multicast address, otherwise false.
      */
     public boolean IsLinkLocalMulticast() {
 	if(m_address[0] == 0xff && m_address[1] == 0x02) {
@@ -479,8 +513,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * Checks if the Ipv6 address is a Ipv4-mapped address.
+     * @return true if the address is the Ipv4-mapped address, otherwise false.
      */
     private static byte[] v4MappedPrefix = {(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,  (byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff};
     public boolean IsIpv4MappedAddress() {
@@ -491,9 +525,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Combines the Ipv6 address with a given prefix.
      * @param prefix
-     * @return
+     * 	      The Ipv6 prefix to combine with.
+     * @return The resulting Ipv6 address after combining with the prefix.
      */
     public Ipv6Address CombinePrefix(Ipv6Prefix prefix) {
 	Ipv6Address ipv6 = new Ipv6Address();
@@ -511,8 +546,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * Checks if the Ipv6 address is a solicated-node multicast address.
+     * @return true if the address is the solicated-node multicast address, otherwise false.
      */
     private static Ipv6Address documentation1 = new Ipv6Address("ff02::1:ff00:0");
     public boolean IsSolicitedMulticast() {
@@ -524,8 +559,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * Checks if the Ipv6 address is a all-node multicast address.
+     * @return true if the address is the all-node multicast address, otherwise false.
      */
     private static Ipv6Address allNodesI = new Ipv6Address("ff01::2");
     private static Ipv6Address allNodesL = new Ipv6Address("ff02::2");
@@ -535,8 +570,8 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return 
+     * Checks if the Ipv6 address is a all-routers multicast address.
+     * @return true if the address is the all-routers multicast address, otherwise false.
      */
     private static Ipv6Address allroutersI = new Ipv6Address("ff01::2");
     private static Ipv6Address allroutersL = new Ipv6Address("ff02::2");
@@ -548,7 +583,8 @@ public class Ipv6Address {
     }
     
     /**
-     * @return
+     * Checks if the Ipv6 address is the unspecified address.
+     * @return true if the address is the unspecified address, otherwise false.
      */
     public boolean IsAny() {
 	Ipv6Address any = new Ipv6Address("::");
@@ -556,8 +592,8 @@ public class Ipv6Address {
     }
    
     /**
-     * 
-     * @return
+     * Checks is the Ipv6 address is in the documentation prefix range.
+     * @return true if the address is the documentation prefix range, otherwise false.
      */
     private static Ipv6Address documentation2 = new Ipv6Address("2001:db8::0");
     public boolean IsDocumentation() {
@@ -569,9 +605,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Checks if the Ipv6 address has a specified prefix.
      * @param prefix
-     * @return
+     * 	      The prefix to check against.
+     * @return true if the address is the specified prefix range, otherwise false.
      */
     public boolean HasPrefix(Ipv6Prefix prefix) {
 	Ipv6Address masked = CombinePrefix(prefix);
@@ -580,17 +617,18 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Checks if the given address is of a matching type for this class.
      * @param address
-     * @return
+     * 	      The address to check.
+     * @return true if the address is compatible, otherwise false.
      */
     public static boolean IsMatchingType(Address address) {
 	return address.CheckCompatible(GetType(), (byte) 16);
     }
     
     /**
-     * 
-     * @return
+     * Converts the current Ipv6 address to an {@code Address} object.
+     * @return a new {@code Address} object representing the Ipv6 address.
      */
     public Address ConvertTo() {
 	byte[] buf = new byte[16];
@@ -600,9 +638,10 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Converts an {@code Address} object to an {@code Ipv6Address}.
      * @param address
-     * @return
+     * 	      The {@code Address} object to convert.
+     * @return a new {@code Ipv6Address} object representing the deserialized address.
      */
     public static Ipv6Address ConvertFrom(Address address) {
 	assert address.CheckCompatible(GetType(), (byte) 16) : "NS_ASSERT failed, cond=false";
@@ -612,8 +651,7 @@ public class Ipv6Address {
     }
    
     /**
-     * 
-     * @return
+     * @return the byte type representing the Ipv6 address type.
      */
     private static byte type = Address.Register();
     public static byte GetType() {
@@ -621,8 +659,7 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * @return the {@code Ipv6Address} object for "ff02::1".
      */
     private static Ipv6Address nmc = new Ipv6Address("ff02::1");
     public Ipv6Address GetAllNodesMulticast() {
@@ -630,8 +667,7 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * @return the {@code Ipv6Address} object for "ff02::0".
      */
     private static Ipv6Address rmc = new Ipv6Address("ff02::2");
     public Ipv6Address GetAllRoutersMulticast() {
@@ -639,8 +675,7 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * @return the {@code Ipv6Address} object for "ff02::3".
      */
     private static Ipv6Address hmc = new Ipv6Address("ff02::3");
     public Ipv6Address GetAllHostsMulticast() {
@@ -648,8 +683,7 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * @return the {@code Ipv6Address} object for "::1".
      */
     private static Ipv6Address loopback = new Ipv6Address("::1");
     public Ipv6Address GetLoopback() {
@@ -657,8 +691,7 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * @return the {@code Ipv6Address} object for "::".
      */
     private static Ipv6Address zero = new Ipv6Address("::");
     public Ipv6Address GetZero() {
@@ -666,7 +699,7 @@ public class Ipv6Address {
     }
     
     /**
-     * @return
+     * @return the {@code Ipv6Address} object for "::".
      */
     private static Ipv6Address any = new Ipv6Address("::");
     public static Ipv6Address GetAny() {
@@ -674,8 +707,7 @@ public class Ipv6Address {
     }
 
     /**
-     * 
-     * @return
+     * @return the {@code Ipv6Address} object for "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff".
      */
     private static Ipv6Address ones = new Ipv6Address("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
     public Ipv6Address GetOnes() {
@@ -683,16 +715,18 @@ public class Ipv6Address {
     }
     
     /**
-     * 
+     * Copies the bytes of the Ipv6 address into the provided buffer.
+     * The method assumes the buffer is large enough to hold the address (16 bytes).
      * @param buf
+     * 	      The byte array to cpoy the address into.
      */
     public void GetBytes(byte[] buf) {
 	System.arraycopy(m_address, 0, buf, 0, 16);// m_address->buf
     }
     
     /**
-     * 
-     * @return
+     * Checks if the Ipv6 address is a link-local address.
+     * @return true if the address is link-local, false otherwise.
      */
     private static Ipv6Address linkLocal = new Ipv6Address("fe80::0");
     public boolean IsLinkLocal() {
@@ -704,8 +738,7 @@ public class Ipv6Address {
     }
     
     /**
-     * 
-     * @return
+     * @return true if the address is initialized, false otherwise.
      */
     public boolean IsInitialized() {
 	return m_initialized;

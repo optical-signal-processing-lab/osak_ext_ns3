@@ -20,7 +20,9 @@ import java.util.Objects;
 import osak.ext.ns3.network.Address;
 
 /**
- * 
+ * The {@code Inet6SocketAddress} class represents an Ipv6 socket address with a port.
+ * It provides multiple constructors to create instances with various input types.
+ * Additionally, it includes methods to manipulate and retrieve the Ipv6 address and port.
  * @author lijianjun
  * @since   1.0
  */
@@ -48,7 +50,9 @@ public class Inet6SocketAddress {
     }
     
     /**
+     * The port number is set to zero by default.
      * @param ipv6
+     * 	      The ipv6 address.
      */
     public Inet6SocketAddress(Ipv6Address ipv6) {
 	m_ipv6 = ipv6;
@@ -57,7 +61,9 @@ public class Inet6SocketAddress {
     
     /**
      * @param ipv6
+     *        String which represents an ipv6 address.
      * @param port
+     * 	      The port number.
      */
     public Inet6SocketAddress(String ipv6, short port) {
 	m_ipv6 = new Ipv6Address(ipv6);
@@ -65,7 +71,9 @@ public class Inet6SocketAddress {
     }
     
     /**
+     * The port number is set to zero.
      * @param ipv6
+     * 	      String which represents an ipv6 address.
      */
     public Inet6SocketAddress(String ipv6) {
 	m_ipv6 = new Ipv6Address(ipv6);
@@ -73,7 +81,9 @@ public class Inet6SocketAddress {
     }
     
     /**
+     * The ipv6 address is set to the "Any" address by default.
      * @param port
+     * 	      The port number.
      */
     public Inet6SocketAddress(short port) {
 	m_ipv6 = Ipv6Address.GetAny();
@@ -112,7 +122,8 @@ public class Inet6SocketAddress {
     
     /**
      * @param address
-     * @return
+     * 	      Address to test
+     * @return true if the address matches, false otherwise.
      */
     public static boolean IsMatchingType(Address address) {
 	return address.CheckCompatible(GetType(), (byte) 18);// 16(address)+2(port)
