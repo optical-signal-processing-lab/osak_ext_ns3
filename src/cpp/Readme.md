@@ -1,0 +1,3 @@
+- copy dir `contrib` to your ns3 dir 
+- use `sudo apt install libeigen3-dev` to install eigen3 library
+- use `ns3 build satellite` to build the satellite library 
